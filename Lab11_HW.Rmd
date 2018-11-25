@@ -1,0 +1,87 @@
+---
+title: "Lab11"
+author: "Huaian Yu"
+date: "11/25/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+#Loading Library
+```{r}
+install.packages("microbenchmark")
+library(microbenchmark)
+library(ggplot2)
+
+```
+
+#Q1. Write a function that generates numbers from binomial(n, p) distribution using runif() function
+**My function**
+```{r}
+my_rbinom <- function(n,p){
+  random_uniform <- runif(n, 0, 1)
+  random_bernoulli <- as.numeric(random_uniform < p)
+  random_binomial <- sum(random_bernoulli)
+  return(random_bernoulli)
+}
+```
+
+#Q2 compare performance
+```{r}
+microbenchmark(my_rbinom(2000,0.4), rbinom(2000,1, 0.4))
+```
+
+#Q3 simulate data from a linear regression model
+```{r}
+n <- 50
+set.seed(123)
+error <- rnorm(n, 0, 3)
+x_covariate <- runif(n, 20, 40)
+beta_0 <- 15
+beta_1 <- 0.4
+y_estimate <- x_covariate * beta_1 + beta_0 + error
+y_true <- x_covariate * beta_1 + beta_0
+df <- data.frame(y_estimate, error)
+g <- ggplot(data = df, aes(x=y_estimate, y=error)) + geom_point()
+g <- g + labs(x = "Fitted Value")
+g <- g + labs(y = "Residual")
+g
+```
+#4 Box-Muller algorithm:
+**My function**
+```{r}
+my_rnorm <- function(n, mean, sd){
+  u1 = runif(n)
+  u2 = runif(n)
+  x=rep(0, n)
+  i <- 1
+  while (i <= n){
+    u1 = runif(n)
+    u2 = runif(n)
+    x[i] <- sqrt(-2 * log(u1[i])) * cos(2 * pi * u2[i])
+
+    if ((i + 1) <= n){
+      x[i + 1] <- sqrt(-2 * log(u1[i])) * sin(2 * pi * u2[i])
+      i <- i + 1
+    }
+
+    i <- i + 1
+  }
+
+  return(x * sd + mean)
+}
+```
+
+**TEST**
+```{r}
+x <- my_rnorm(5000, 1, 2)
+y <- rnorm(5000, 1, 1)
+df2 <- data.frame(x, y)
+ggplot(data=df2, aes(df2$x)) + geom_histogram()
+ggplot(data=df2, aes(df2$y)) + geom_histogram()
+```
+
+
+
+
